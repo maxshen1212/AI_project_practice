@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,

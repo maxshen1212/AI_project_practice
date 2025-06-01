@@ -13,7 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import * as Icons from '@mui/icons-material';
-import { createAppTheme } from '../theme';
+import { createAppTheme, DEFAULT_CATEGORIES } from '../theme';
 import IconSelector from './IconSelector';
 
 interface CategoryData {
@@ -28,19 +28,11 @@ interface CategoryManagerProps {
 }
 
 export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange }) => {
-  const [categories, setCategories] = useState<CategoryData[]>([
-    { id: 'food', name: '飲食', color: '#f57c00', icon: 'Restaurant' },
-    { id: 'daily', name: '日用品', color: '#1976d2', icon: 'ShoppingCart' },
-    { id: 'transport', name: '交通', color: '#388e3c', icon: 'DirectionsCar' },
-    { id: 'medical', name: '醫療', color: '#d32f2f', icon: 'LocalHospital' },
-    { id: 'entertainment', name: '娛樂', color: '#7b1fa2', icon: 'SportsEsports' },
-    { id: 'others', name: '其他', color: '#757575', icon: 'More' },
-  ]);
+  const [categories, setCategories] = useState<CategoryData[]>(DEFAULT_CATEGORIES);
   const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
   const [newCategory, setNewCategory] = useState<Partial<CategoryData>>({
     color: '#000000'
   });
-  const [deletingCategories, setDeletingCategories] = useState<string[]>([]);
   const [isAdding, setIsAdding] = useState(false);
 
   const handleDelete = (id: string) => {
@@ -48,7 +40,6 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange 
       alert('無法刪除預設類別');
       return;
     }
-    setDeletingCategories(prev => [...prev, id]);
     const updatedCategories = categories.filter(cat => cat.id !== id);
     setCategories(updatedCategories);
     updateTheme(updatedCategories);

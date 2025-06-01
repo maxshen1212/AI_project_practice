@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Box, Container, ThemeProvider, createTheme, CssBaseline, Typography } from '@mui/material';
+import { Box, Container, ThemeProvider, createTheme, CssBaseline, Typography, IconButton } from '@mui/material';
 import Display from './components/Display';
 import Keypad from './components/Keypad';
 import HistoryList from './components/HistoryList';
 import CategorySelector, { Category } from './components/CategorySelector';
 import { PaletteColor, PaletteColorOptions } from '@mui/material/styles';
-import { theme as defaultTheme } from './theme';
+import { theme as defaultTheme, DEFAULT_CATEGORIES } from './theme';
 import { CategoryManager } from './components/CategoryManager';
 import Sidebar from './components/Sidebar';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 
 // 擴展主題類型定義
 declare module '@mui/material/styles' {
@@ -40,113 +42,6 @@ interface HistoryRecord {
   category: Category;
 }
 
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    background: {
-      default: '#F5F2ED',
-      paper: '#FFFFFF',
-    },
-    primary: {
-      main: '#8B7355',
-      light: '#A69783',
-      dark: '#6F5B45',
-    },
-    secondary: {
-      main: '#9F8170',
-      light: '#B4A397',
-      dark: '#8B6F5F',
-    },
-    text: {
-      primary: '#5C4033',
-      secondary: '#8B7355',
-    },
-    categories: {
-      food: {
-        main: '#8B7355',
-        light: '#A69783',
-        dark: '#6F5B45',
-        contrastText: '#FFFFFF',
-      },
-      daily: {
-        main: '#9F8170',
-        light: '#B4A397',
-        dark: '#8B6F5F',
-        contrastText: '#FFFFFF',
-      },
-      transport: {
-        main: '#A67F59',
-        light: '#BFA084',
-        dark: '#8B6B4A',
-        contrastText: '#FFFFFF',
-      },
-      medical: {
-        main: '#8B7E66',
-        light: '#A69B87',
-        dark: '#6F654E',
-        contrastText: '#FFFFFF',
-      },
-      entertainment: {
-        main: '#B38B4D',
-        light: '#C9A97A',
-        dark: '#9F7B42',
-        contrastText: '#FFFFFF',
-      },
-      others: {
-        main: '#8E8279',
-        light: '#A69992',
-        dark: '#776C64',
-        contrastText: '#FFFFFF',
-      },
-    },
-  },
-  typography: {
-    fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
-    h6: {
-      fontSize: '1.1rem',
-      fontWeight: 500,
-      letterSpacing: '0.02em',
-      color: '#5C4033',
-    },
-    body1: {
-      fontSize: '1rem',
-      letterSpacing: '0.01em',
-      color: '#5C4033',
-    },
-    body2: {
-      fontSize: '0.9rem',
-      letterSpacing: '0.01em',
-      color: '#5C4033',
-    },
-  },
-  spacing: (factor: number) => `${factor * 8}px`,
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          '&.MuiButton-outlined': {
-            borderWidth: '1.5px',
-            '&:hover': {
-              borderWidth: '1.5px',
-            },
-          },
-        },
-      },
-    },
-    MuiContainer: {
-      styleOverrides: {
-        root: {
-          paddingLeft: '24px',
-          paddingRight: '24px',
-        },
-      },
-    },
-  },
-});
-
 const App: React.FC = () => {
   const [currentAmount, setCurrentAmount] = useState<string>('0');
   const [total, setTotal] = useState<number>(0);
@@ -154,16 +49,9 @@ const App: React.FC = () => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<HistoryRecord | null>(null);
-  const [theme, setTheme] = useState(defaultTheme);
+  const [appTheme, setAppTheme] = useState(defaultTheme);
   const [selectedPage, setSelectedPage] = useState('accounting');
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 'food', name: '飲食', color: '#f57c00' },
-    { id: 'daily', name: '日用品', color: '#1976d2' },
-    { id: 'transport', name: '交通', color: '#388e3c' },
-    { id: 'medical', name: '醫療', color: '#d32f2f' },
-    { id: 'entertainment', name: '娛樂', color: '#7b1fa2' },
-    { id: 'others', name: '其他', color: '#757575' },
-  ]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleInput = (value: string) => {
@@ -266,7 +154,7 @@ const App: React.FC = () => {
   };
 
   const handleThemeChange = (newTheme: ReturnType<typeof createTheme>, updatedCategories: Category[]) => {
-    setTheme(newTheme);
+    setAppTheme(newTheme);
     setCategories(updatedCategories);
   };
 
@@ -347,7 +235,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={appTheme}>
       <CssBaseline />
       <Box sx={{ display: 'flex' }}>
         <Sidebar
@@ -362,18 +250,46 @@ const App: React.FC = () => {
             flexGrow: 1,
             minHeight: '100vh',
             backgroundColor: 'background.default',
-            py: 6,
-            px: 3,
-            ml: sidebarOpen ? '240px' : '65px',
+            py: { xs: 2, sm: 4, md: 6 },
+            px: { xs: 1, sm: 2, md: 3 },
+            ml: {
+              xs: 0,
+              md: sidebarOpen ? '240px' : '65px'
+            },
             transition: theme => theme.transitions.create('margin', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
           }}
         >
-          <Container maxWidth="md">
-            {renderContent()}
-          </Container>
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '64px',
+              display: { xs: 'flex', md: 'none' },
+              alignItems: 'center',
+              px: 2,
+              backgroundColor: 'background.paper',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              zIndex: 1100,
+            }}
+          >
+            <IconButton
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              sx={{ color: 'primary.main' }}
+            >
+              {sidebarOpen ? <MenuOpenIcon /> : <MenuIcon />}
+            </IconButton>
+          </Box>
+          <Box sx={{ mt: { xs: '64px', md: 0 } }}>
+            <Container maxWidth="md">
+              {renderContent()}
+            </Container>
+          </Box>
         </Box>
       </Box>
     </ThemeProvider>

@@ -1,48 +1,51 @@
 import React from 'react';
-import { Box, Typography, styled } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 interface DisplayProps {
   total: number;
   currentAmount: string;
 }
 
-const DisplayBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  width: '100%',
-  marginBottom: theme.spacing(2),
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: '16px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-end',
-  gap: '8px',
-  border: `1.5px solid ${theme.palette.primary.light}30`,
-  boxShadow: '0 4px 6px rgba(139, 115, 85, 0.1)',
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    border: `1.5px solid ${theme.palette.primary.light}60`,
-    boxShadow: '0 6px 8px rgba(139, 115, 85, 0.15)',
-  }
-}));
-
-const AmountText = styled(Typography)(({ theme }) => ({
-  fontFamily: '"SF Mono", "Monaco", monospace',
-  fontWeight: '600',
-  color: theme.palette.text.primary,
-  lineHeight: 1.2,
-  letterSpacing: '0.02em',
-}));
-
 const Display: React.FC<DisplayProps> = ({ total, currentAmount }) => {
   return (
-    <DisplayBox>
-      <AmountText variant="h4" sx={{ opacity: 0.85 }}>
-        花費總額=${total}
-      </AmountText>
-      <AmountText variant="h3">
-        ${currentAmount || '0.00'}
-      </AmountText>
-    </DisplayBox>
+    <Box sx={{
+      backgroundColor: 'background.paper',
+      borderRadius: '16px',
+      p: { xs: 2, sm: 3, md: 4 },
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+          mb: 1,
+          fontSize: { xs: '0.9rem', sm: '1rem' }
+        }}
+      >
+        總支出
+      </Typography>
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 500,
+          color: 'text.primary',
+          mb: 2,
+          fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }
+        }}
+      >
+        {total.toLocaleString()} 元
+      </Typography>
+      <Typography
+        variant="body1"
+        sx={{
+          textAlign: 'right',
+          color: 'text.primary',
+          fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.8rem' }
+        }}
+      >
+        {currentAmount}
+      </Typography>
+    </Box>
   );
 };
 

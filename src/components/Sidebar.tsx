@@ -11,6 +11,7 @@ import {
   IconButton,
   Tooltip,
   Divider,
+  useMediaQuery,
 } from '@mui/material';
 import CategoryIcon from '@mui/icons-material/Category';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -29,7 +30,7 @@ export type MenuItem = {
 
 interface SidebarProps {
   selectedItem: string;
-  onItemSelect: (itemId: string) => void;
+  onItemSelect: (item: string) => void;
   open: boolean;
   onToggle: () => void;
 }
@@ -52,129 +53,139 @@ const menuItems: MenuItem[] = [
   },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ selectedItem, onItemSelect, open, onToggle }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  selectedItem,
+  onItemSelect,
+  open,
+  onToggle,
+}) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: open ? drawerWidth : closedDrawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: open ? drawerWidth : closedDrawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: theme.palette.background.paper,
-          borderRight: `1px solid ${theme.palette.divider}`,
-          overflowX: 'hidden',
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       <Box sx={{
         display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        p: 1,
+        minHeight: '64px'
       }}>
-        {/* 頂部縮放按鈕區域 */}
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: open ? 'flex-end' : 'center',
-          minHeight: 64,
-          px: 1,
-          mt: 1,
-        }}>
-          <IconButton
-            onClick={onToggle}
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: '12px',
-              backgroundColor: `${theme.palette.primary.main}10`,
-              '&:hover': {
-                backgroundColor: `${theme.palette.primary.main}20`,
-              },
-            }}
-          >
-            {open ? (
-              <MenuOpenIcon
-                sx={{
-                  fontSize: 28,
-                  color: theme.palette.primary.main,
-                }}
-              />
-            ) : (
-              <MenuIcon
-                sx={{
-                  fontSize: 28,
-                  color: theme.palette.primary.main,
-                }}
-              />
-            )}
-          </IconButton>
-        </Box>
-
-        <Divider sx={{ my: 1 }} />
-
-        {/* 選單列表 */}
-        <List sx={{ mt: 1 }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.id} disablePadding>
-              <Tooltip title={!open ? item.label : ""} placement="right">
-                <ListItemButton
-                  selected={selectedItem === item.id}
-                  onClick={() => onItemSelect(item.id)}
+        <IconButton onClick={onToggle}>
+          {open ? <MenuOpenIcon /> : <MenuIcon />}
+        </IconButton>
+      </Box>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem key={item.id} disablePadding sx={{ display: 'block' }}>
+            <ListItemButton
+              selected={selectedItem === item.id}
+              onClick={() => {
+                onItemSelect(item.id);
+                if (isMobile) onToggle();
+              }}
+              sx={{
+                minHeight: 48,
+                justifyContent: open ? 'initial' : 'center',
+                px: 2.5,
+              }}
+            >
+              <Tooltip title={!open ? item.label : ''} placement="right">
+                <ListItemIcon
                   sx={{
-                    minHeight: 48,
-                    justifyContent: open ? 'initial' : 'center',
-                    px: 2.5,
-                    '&.Mui-selected': {
-                      backgroundColor: `${theme.palette.primary.main}15`,
-                      borderRight: `3px solid ${theme.palette.primary.main}`,
-                      '&:hover': {
-                        backgroundColor: `${theme.palette.primary.main}25`,
-                      },
-                    },
-                    '&:hover': {
-                      backgroundColor: `${theme.palette.primary.main}10`,
-                    },
+                    minWidth: 0,
+                    mr: open ? 2 : 'auto',
+                    justifyContent: 'center',
                   }}
                 >
-                  <ListItemIcon
+                  {item.icon}
+                </ListItemIcon>
+              </Tooltip>
+              {open && <ListItemText primary={item.label} />}
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </>
+  );
+
+  return (
+    <Box component="nav">
+      {isMobile ? (
+        <Drawer
+          variant="temporary"
+          open={open}
+          onClose={onToggle}
+          ModalProps={{
+            keepMounted: true, // Better mobile performance
+          }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              boxSizing: 'border-box',
+              backgroundColor: 'background.paper',
+              mt: '64px', // 為頂部工具列留出空間
+              height: 'calc(100% - 64px)', // 調整高度
+            },
+          }}
+        >
+          <Box sx={{ overflow: 'auto' }}>
+            <List>
+              {menuItems.map((item) => (
+                <ListItem key={item.id} disablePadding sx={{ display: 'block' }}>
+                  <ListItemButton
+                    selected={selectedItem === item.id}
+                    onClick={() => {
+                      onItemSelect(item.id);
+                      if (isMobile) onToggle();
+                    }}
                     sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : 'auto',
-                      justifyContent: 'center',
-                      color: selectedItem === item.id
-                        ? theme.palette.primary.main
-                        : theme.palette.text.secondary,
+                      minHeight: 48,
+                      justifyContent: 'initial',
+                      px: 2.5,
                     }}
                   >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    sx={{
-                      opacity: open ? 1 : 0,
-                      '& .MuiListItemText-primary': {
-                        color: selectedItem === item.id
-                          ? theme.palette.primary.main
-                          : theme.palette.text.primary,
-                        fontWeight: selectedItem === item.id ? 500 : 400,
-                      },
-                    }}
-                  />
-                </ListItemButton>
-              </Tooltip>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-    </Drawer>
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: 2,
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={item.label} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          open={open}
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': {
+              width: open ? drawerWidth : closedDrawerWidth,
+              transition: theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+              overflowX: 'hidden',
+              backgroundColor: 'background.paper',
+              borderRight: '1px solid',
+              borderColor: 'divider',
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      )}
+    </Box>
   );
 };
 
