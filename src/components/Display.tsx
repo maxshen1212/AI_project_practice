@@ -37,7 +37,7 @@ const Display: React.FC<DisplayProps> = ({ total, currentAmount }) => {
   return (
     <DisplayBox>
       <AmountText variant="h4" sx={{ opacity: 0.85 }}>
-        ${total}
+        花費總額=${total}
       </AmountText>
       <AmountText variant="h3">
         ${currentAmount || '0.00'}

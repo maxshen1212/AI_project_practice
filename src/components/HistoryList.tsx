@@ -282,7 +282,6 @@ const HistoryList: React.FC<HistoryListProps> = ({ history, onEditRecord, onDele
             </DateTimeComponent>
             {/* 類別區塊 */}
             <CategoryComponent categoryId={record.category.id}>
-              {record.category.icon}
               <Typography className="category-text">{record.category.name}</Typography>
             </CategoryComponent>
             {/* 金額區塊 */}

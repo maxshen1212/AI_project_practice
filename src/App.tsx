@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Box, Container, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { Box, Container, ThemeProvider, createTheme, CssBaseline, Typography } from '@mui/material';
 import Display from './components/Display';
 import Keypad from './components/Keypad';
 import HistoryList from './components/HistoryList';
 import CategorySelector, { Category } from './components/CategorySelector';
 import { PaletteColor, PaletteColorOptions } from '@mui/material/styles';
+import { theme as defaultTheme } from './theme';
+import { CategoryManager } from './components/CategoryManager';
+import Sidebar from './components/Sidebar';
 
 // 擴展主題類型定義
 declare module '@mui/material/styles' {
@@ -151,6 +154,17 @@ const App: React.FC = () => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<HistoryRecord | null>(null);
+  const [theme, setTheme] = useState(defaultTheme);
+  const [selectedPage, setSelectedPage] = useState('accounting');
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 'food', name: '飲食', color: '#f57c00' },
+    { id: 'daily', name: '日用品', color: '#1976d2' },
+    { id: 'transport', name: '交通', color: '#388e3c' },
+    { id: 'medical', name: '醫療', color: '#d32f2f' },
+    { id: 'entertainment', name: '娛樂', color: '#7b1fa2' },
+    { id: 'others', name: '其他', color: '#757575' },
+  ]);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleInput = (value: string) => {
     if (currentAmount === '0' && value !== '.') {
@@ -251,30 +265,54 @@ const App: React.FC = () => {
     }
   };
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          minHeight: '100vh',
-          backgroundColor: 'background.default',
-          py: 6,
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'center',
-        }}
-      >
-        <Container maxWidth="sm">
-          <Box sx={{
-            maxWidth: 440,
-            mx: 'auto',
-          }}>
-            <Display total={total} currentAmount={currentAmount} />
+  const handleThemeChange = (newTheme: ReturnType<typeof createTheme>, updatedCategories: Category[]) => {
+    setTheme(newTheme);
+    setCategories(updatedCategories);
+  };
+
+  const renderContent = () => {
+    switch (selectedPage) {
+      case 'categories':
+        return (
+          <Box sx={{ p: 4 }}>
             <Box sx={{
               backgroundColor: 'background.paper',
               p: 4,
               borderRadius: '16px',
-              mt: 3,
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h5" sx={{ fontWeight: 500 }}>類別管理</Typography>
+              </Box>
+              <CategoryManager onThemeChange={handleThemeChange} />
+            </Box>
+          </Box>
+        );
+      case 'settings':
+        return (
+          <Box sx={{ p: 4 }}>
+            <Box sx={{
+              backgroundColor: 'background.paper',
+              p: 4,
+              borderRadius: '16px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}>
+              <Typography variant="h5" sx={{ fontWeight: 500, mb: 3 }}>使用者設定</Typography>
+              <p>設定頁面開發中...</p>
+            </Box>
+          </Box>
+        );
+      case 'accounting':
+      default:
+        return (
+          <>
+            <Box sx={{ mb: 3 }}>
+              <Display total={total} currentAmount={currentAmount} />
+            </Box>
+            <Box sx={{
+              backgroundColor: 'background.paper',
+              p: 4,
+              borderRadius: '16px',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             }}>
               {showCategorySelector ? (
@@ -283,6 +321,7 @@ const App: React.FC = () => {
                   onCancel={handleCategoryCancel}
                   amount={pendingAmount?.toString() || '0'}
                   isEditing={!!editingRecord}
+                  categories={categories}
                 />
               ) : (
                 <>
@@ -302,8 +341,40 @@ const App: React.FC = () => {
                 </>
               )}
             </Box>
-          </Box>
-        </Container>
+          </>
+        );
+    }
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: 'flex' }}>
+        <Sidebar
+          selectedItem={selectedPage}
+          onItemSelect={setSelectedPage}
+          open={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            minHeight: '100vh',
+            backgroundColor: 'background.default',
+            py: 6,
+            px: 3,
+            ml: sidebarOpen ? '240px' : '65px',
+            transition: theme => theme.transitions.create('margin', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          }}
+        >
+          <Container maxWidth="md">
+            {renderContent()}
+          </Container>
+        </Box>
       </Box>
     </ThemeProvider>
   );
