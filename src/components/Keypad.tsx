@@ -13,13 +13,16 @@ const CalcButton = styled(Button)(({ theme }) => ({
   width: '100%',
   height: '80px',
   fontSize: '2rem',
-  fontWeight: 'bold',
+  fontWeight: '500',
   borderRadius: '12px',
   border: 'none',
-  backgroundColor: '#2f3542',
-  color: '#ffffff',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.text.primary,
+  transition: 'all 0.2s ease',
+  boxShadow: '0 2px 4px rgba(139, 115, 85, 0.1)',
   '&:hover': {
-    backgroundColor: '#3d4453',
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: '0 4px 8px rgba(139, 115, 85, 0.15)',
   }
 }));
 
@@ -40,32 +43,33 @@ const Keypad: React.FC<KeypadProps> = ({
     switch (btn) {
       case 'AC':
         return {
-          backgroundColor: '#e67e22',
-          color: '#ffffff',
+          backgroundColor: '#A67F59',
+          color: '#FFFFFF',
           '&:hover': {
-            backgroundColor: '#d35400',
+            backgroundColor: '#8B6B4A',
           }
         };
       case '⌫':
         return {
-          backgroundColor: '#f1c40f',
-          color: '#ffffff',
+          backgroundColor: '#9F8170',
+          color: '#FFFFFF',
           '&:hover': {
-            backgroundColor: '#f39c12',
+            backgroundColor: '#8B6F5F',
           }
         };
       case 'OK':
         return {
-          backgroundColor: '#3498db',
-          color: '#ffffff',
+          backgroundColor: '#8B7355',
+          color: '#FFFFFF',
           height: '100%',
           '&:hover': {
-            backgroundColor: '#2980b9',
+            backgroundColor: '#6F5B45',
           }
         };
       case '+':
         return {
           fontSize: '2rem',
+          color: '#8B7355',
         };
       default:
         return {};
