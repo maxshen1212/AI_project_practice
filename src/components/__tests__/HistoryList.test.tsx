@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import type { PaletteColor, PaletteColorOptions } from '@mui/material';
 import HistoryList from '../HistoryList';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
 import type { Category } from '../CategorySelector';
 
 // 定義記錄的類型
@@ -107,6 +108,36 @@ const mockHistory: HistoryRecord[] = [
       icon: <RestaurantIcon />,
     },
   },
+  {
+    id: '2',
+    amount: 40,
+    date: new Date('2024-03-21T10:30:00'),
+    category: {
+      id: 'daily',
+      name: '日用品',
+      icon: <ShoppingBasketIcon />,
+    },
+  },
+  {
+    id: '3',
+    amount: 40,
+    date: new Date('2024-03-21T10:30:00'),
+    category: {
+      id: 'daily',
+      name: '日用品',
+      icon: <ShoppingBasketIcon />,
+    },
+  },
+  {
+    id: '4',
+    amount: 100,
+    date: new Date('2024-03-21T10:30:00'),
+    category: {
+      id: 'food',
+      name: '飲食',
+      icon: <RestaurantIcon />,
+    },
+  },
 ];
 
 // 歷史記錄列表組件的測試套件
@@ -122,7 +153,7 @@ describe('HistoryList', () => {
 
   // 封裝渲染函數，提供主題支援
   const renderHistoryList = (history: HistoryRecord[] = []) => {
-    return render(
+    const utils = render(
       <ThemeProvider theme={theme}>
         <HistoryList
           history={history}
@@ -131,49 +162,54 @@ describe('HistoryList', () => {
         />
       </ThemeProvider>
     );
+    return { ...utils };
   };
 
   // 測試空記錄狀態的顯示
-  test('空記錄時顯示預設狀態', async () => {
+  test('空記錄時顯示預設狀態', () => {
     renderHistoryList();
-    await waitFor(() => {
-      expect(screen.getByText(/0/)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/0/)).toBeInTheDocument();
   });
 
   // 測試金額的顯示
-  test('顯示記錄的金額', async () => {
+  test('顯示記錄的金額', () => {
     renderHistoryList(mockHistory);
-    await waitFor(() => {
-      expect(screen.getByText(/100/)).toBeInTheDocument();
-    });
+    // 檢查金額 40 的記錄
+    const amount40Elements = screen.getAllByText(/40/);
+    expect(amount40Elements).toHaveLength(2);
+
+    // 檢查金額 100 的記錄
+    const amount100Elements = screen.getAllByText(/100/);
+    expect(amount100Elements).toHaveLength(2);
   });
 
   // 測試類別的顯示
-  test('顯示記錄的類別', async () => {
+  test('顯示記錄的類別', () => {
     renderHistoryList(mockHistory);
-    await waitFor(() => {
-      expect(screen.getByText('飲食')).toBeInTheDocument();
-    });
+    // 檢查飲食類別
+    const foodCategories = screen.getAllByText('飲食');
+    expect(foodCategories).toHaveLength(2);
+    expect(foodCategories[0]).toBeInTheDocument();
+
+    // 檢查日用品類別
+    const dailyCategories = screen.getAllByText('日用品');
+    expect(dailyCategories).toHaveLength(2);
+    expect(dailyCategories[0]).toBeInTheDocument();
   });
 
   // 測試刪除功能
-  test('點擊刪除按鈕時調用刪除函數', async () => {
+  test('點擊刪除按鈕時調用刪除函數', () => {
     renderHistoryList(mockHistory);
-    const deleteButton = await screen.findByTestId('delete-button-1');
+    const deleteButton = screen.getByTestId('delete-button-1');
     fireEvent.click(deleteButton);
-    await waitFor(() => {
-      expect(mockOnDeleteRecord).toHaveBeenCalledWith('1');
-    });
+    expect(mockOnDeleteRecord).toHaveBeenCalledWith('1');
   });
 
   // 測試編輯功能
-  test('雙擊記錄時調用編輯函數', async () => {
+  test('雙擊記錄時調用編輯函數', () => {
     renderHistoryList(mockHistory);
-    const record = await screen.findByTestId('record-1');
+    const record = screen.getByTestId('record-1');
     fireEvent.doubleClick(record);
-    await waitFor(() => {
-      expect(mockOnEditRecord).toHaveBeenCalledWith(mockHistory[0]);
-    });
+    expect(mockOnEditRecord).toHaveBeenCalledWith(mockHistory[0]);
   });
 });
