@@ -22,6 +22,8 @@ interface HistoryListProps {
 // 定義類別相關的 props 介面
 interface CategoryProps {
   categoryId: string;  // 類別的唯一識別碼
+  children?: React.ReactNode;  // 子元素
+  className?: string;  // 樣式類名
 }
 
 // 基礎容器元件，用於所有記錄項目的共同樣式
@@ -82,7 +84,9 @@ const DateTimeComponent = styled(ItemContainer)(({ theme }) => ({
 }));
 
 // 類別顯示元件
-const CategoryComponent = styled(ItemContainer)<CategoryProps>(({ theme, categoryId }) => ({
+const CategoryComponent = styled('div')<CategoryProps>(({ theme, categoryId }) => ({
+  display: 'flex',
+  alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing(1),
   padding: theme.spacing(0.75, 1),
@@ -93,12 +97,12 @@ const CategoryComponent = styled(ItemContainer)<CategoryProps>(({ theme, categor
   minWidth: '85px',
   flexShrink: 0,
   overflow: 'hidden',
-  '& .MuiSvgIcon-root': {  // 類別圖標樣式
+  '& .MuiSvgIcon-root': {
     fontSize: '1rem',
     color: theme.palette.categories[categoryId as keyof typeof theme.palette.categories].main,
     flexShrink: 0,
   },
-  '& .category-text': {    // 類別文字樣式
+  '& .category-text': {
     fontSize: '0.85rem',
     letterSpacing: '0.01em',
     fontWeight: 500,
@@ -269,6 +273,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ history, onEditRecord, onDele
           <RecordItem
             key={record.id}
             onDoubleClick={() => handleDoubleClick(record)}
+            data-testid={`record-${record.id}`}
           >
             {/* 日期時間區塊 */}
             <DateTimeComponent>
@@ -310,6 +315,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ history, onEditRecord, onDele
                 className="delete-button"
                 onClick={(e) => handleDelete(e, record.id)}
                 size="small"
+                data-testid={`delete-button-${record.id}`}
               >
                 <DeleteIcon fontSize="small" />
               </DeleteButton>

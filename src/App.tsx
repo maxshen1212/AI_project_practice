@@ -195,21 +195,26 @@ const App: React.FC = () => {
 
   const handleCategorySelect = (category: Category) => {
     if (editingRecord) {
-      const newHistory = history.map(record => {
-        if (record.id === editingRecord.id) {
-          const newRecord = {
-            ...record,
-            amount: pendingAmount || record.amount,
-            category: category
-          };
-          setTotal(prev => prev - record.amount + (pendingAmount || record.amount));
-          return newRecord;
-        }
-        return record;
-      });
-      setHistory(newHistory);
-      setEditingRecord(null);
-    } else if (pendingAmount !== null) {
+      if (pendingAmount === 0) {
+        handleDeleteRecord(editingRecord.id);
+        setEditingRecord(null);
+      } else {
+        const newHistory = history.map(record => {
+          if (record.id === editingRecord.id) {
+            const newRecord = {
+              ...record,
+              amount: pendingAmount || record.amount,
+              category: category
+            };
+            setTotal(prev => prev - record.amount + (pendingAmount || record.amount));
+            return newRecord;
+          }
+          return record;
+        });
+        setHistory(newHistory);
+        setEditingRecord(null);
+      }
+    } else if (pendingAmount !== null && pendingAmount !== 0) {
       const newRecord: HistoryRecord = {
         id: Date.now().toString(),
         amount: pendingAmount,
@@ -276,7 +281,7 @@ const App: React.FC = () => {
                 <CategorySelector
                   onSelect={handleCategorySelect}
                   onCancel={handleCategoryCancel}
-                  amount={pendingAmount?.toFixed(2) || '0.00'}
+                  amount={pendingAmount?.toString() || '0'}
                   isEditing={!!editingRecord}
                 />
               ) : (
