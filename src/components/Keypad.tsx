@@ -11,22 +11,15 @@ interface KeypadProps {
 
 const CalcButton = styled(Button)(({ theme }) => ({
   width: '100%',
-  height: '64px',
-  fontSize: '1.5rem',
+  height: '80px',
+  fontSize: '2rem',
+  fontWeight: 'bold',
   borderRadius: '12px',
   border: 'none',
-  backgroundColor: '#ffffff',
-  color: '#333333',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  transition: 'all 0.2s ease',
+  backgroundColor: '#2f3542',
+  color: '#ffffff',
   '&:hover': {
-    backgroundColor: '#f8f9fa',
-    transform: 'translateY(-1px)',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.15)',
-  },
-  '&:active': {
-    transform: 'translateY(1px)',
-    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+    backgroundColor: '#3d4453',
   }
 }));
 
@@ -47,54 +40,35 @@ const Keypad: React.FC<KeypadProps> = ({
     switch (btn) {
       case 'AC':
         return {
-          color: '#e74c3c',
-          fontWeight: 'bold',
-          fontSize: '1.2rem',
+          backgroundColor: '#e67e22',
+          color: '#ffffff',
+          '&:hover': {
+            backgroundColor: '#d35400',
+          }
         };
       case '⌫':
         return {
-          color: '#e74c3c',
-          '& svg': {
-            fontSize: '1.8rem',
+          backgroundColor: '#f1c40f',
+          color: '#ffffff',
+          '&:hover': {
+            backgroundColor: '#f39c12',
           }
         };
       case 'OK':
         return {
-          backgroundColor: '#2ecc71',
+          backgroundColor: '#3498db',
           color: '#ffffff',
-          fontWeight: 'bold',
+          height: '100%',
           '&:hover': {
-            backgroundColor: '#27ae60',
+            backgroundColor: '#2980b9',
           }
         };
       case '+':
         return {
-          color: '#3498db',
-          fontWeight: 'bold',
-          fontSize: '1.8rem',
+          fontSize: '2rem',
         };
       default:
-        return {
-          fontFamily: '"SF Mono", "Monaco", monospace',
-        };
-    }
-  };
-
-  const handleClick = (btn: string) => {
-    switch (btn) {
-      case 'AC':
-        onClear();
-        break;
-      case '⌫':
-        onBackspace();
-        break;
-      case 'OK':
-        onOk();
-        break;
-      case '':
-        break;
-      default:
-        onInput(btn);
+        return {};
     }
   };
 
@@ -103,16 +77,30 @@ const Keypad: React.FC<KeypadProps> = ({
       {buttons.map((btn, index) => (
         <Grid
           item
-          xs={btn === 'OK' ? 6 : 3}
+          xs={btn === 'OK' ? 3 : 3}
           key={index}
+          sx={btn === 'OK' ? { gridRow: 'span 2' } : {}}
         >
           {btn !== '' && (
             <CalcButton
-              variant={btn === 'OK' ? 'contained' : 'outlined'}
-              onClick={() => handleClick(btn)}
+              onClick={() => {
+                switch (btn) {
+                  case 'AC':
+                    onClear();
+                    break;
+                  case '⌫':
+                    onBackspace();
+                    break;
+                  case 'OK':
+                    onOk();
+                    break;
+                  default:
+                    onInput(btn);
+                }
+              }}
               sx={getButtonStyle(btn)}
             >
-              {btn === '⌫' ? <BackspaceIcon /> : btn}
+              {btn === '⌫' ? <BackspaceIcon sx={{ fontSize: '2rem' }} /> : btn}
             </CalcButton>
           )}
         </Grid>

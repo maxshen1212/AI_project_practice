@@ -1,65 +1,39 @@
 import React from 'react';
-import { Paper, Typography, styled } from '@mui/material';
+import { Box, Typography, styled } from '@mui/material';
 
 interface DisplayProps {
   total: number;
   currentAmount: string;
 }
 
-const DisplayBox = styled(Paper)(({ theme }) => ({
+const DisplayBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   width: '100%',
   marginBottom: theme.spacing(2),
-  backgroundColor: '#f8f9fa',
-  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  border: 'none',
+  backgroundColor: '#ffffff',
   borderRadius: '16px',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
-  }
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+  gap: '8px',
 }));
 
-const AmountDisplay = styled(Typography)({
-  textAlign: 'right',
-  padding: '12px',
+const AmountText = styled(Typography)({
   fontFamily: '"SF Mono", "Monaco", monospace',
-  letterSpacing: '1px',
-});
-
-const HistoryLabel = styled(Typography)({
-  color: '#666',
-  fontSize: '0.9rem',
-  marginBottom: '4px',
+  fontWeight: 'bold',
+  color: '#2c3e50',
+  lineHeight: 1.2,
 });
 
 const Display: React.FC<DisplayProps> = ({ total, currentAmount }) => {
   return (
     <DisplayBox>
-      <HistoryLabel>上次計算結果</HistoryLabel>
-      <AmountDisplay
-        variant="h5"
-        sx={{
-          color: '#666',
-          fontSize: '1.2rem',
-        }}
-      >
+      <AmountText variant="h4">
         ${total.toFixed(2)}
-      </AmountDisplay>
-      <AmountDisplay
-        variant="h4"
-        sx={{
-          backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          padding: '16px',
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          color: '#2c3e50',
-          boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
-        }}
-      >
+      </AmountText>
+      <AmountText variant="h3">
         ${currentAmount || '0.00'}
-      </AmountDisplay>
+      </AmountText>
     </DisplayBox>
   );
 };

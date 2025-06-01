@@ -1,87 +1,113 @@
 import React from 'react';
-import { Paper, Typography, List, ListItem, styled, Box } from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Box, Typography, styled } from '@mui/material';
 
-interface HistoryListProps {
-  history: number[];
+interface HistoryRecord {
+  amount: number;
+  date: Date;
 }
 
-const HistoryPaper = styled(Paper)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  padding: theme.spacing(3),
-  backgroundColor: '#ffffff',
-  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-  border: 'none',
-  borderRadius: '16px',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    boxShadow: '0 6px 8px rgba(0, 0, 0, 0.15)',
+interface HistoryListProps {
+  history: HistoryRecord[];
+}
+
+const HistoryBox = styled(Box)(({ theme }) => ({
+  backgroundColor: '#3498db',
+  borderRadius: '12px',
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  maxHeight: '120px',
+  overflowY: 'auto',
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '3px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: '3px',
   }
 }));
 
-const HistoryItem = styled(ListItem)(({ theme }) => ({
-  padding: theme.spacing(1.5),
-  borderBottom: '1px solid #f0f0f0',
-  '&:last-child': {
-    borderBottom: 'none',
-  },
-  transition: 'background-color 0.2s ease',
-  '&:hover': {
-    backgroundColor: '#f8f9fa',
+const HistoryItem = styled(Box)({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '8px',
+  '&:not(:last-child)': {
+    opacity: 0.7,
   }
-}));
+});
+
+const DateTimeContainer = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '2px',
+});
+
+const DateText = styled(Typography)({
+  fontFamily: '"SF Mono", "Monaco", monospace',
+  color: '#ffffff',
+  fontSize: '1rem',
+  opacity: 0.9,
+});
+
+const TimeText = styled(Typography)({
+  fontFamily: '"SF Mono", "Monaco", monospace',
+  color: '#ffffff',
+  fontSize: '0.85rem',
+  opacity: 0.7,
+});
 
 const AmountText = styled(Typography)({
   fontFamily: '"SF Mono", "Monaco", monospace',
-  fontWeight: 500,
-  letterSpacing: '1px',
-  color: '#2c3e50',
+  fontWeight: 'bold',
+  color: '#ffffff',
+  textAlign: 'right',
+  fontSize: '1.5rem',
+  lineHeight: '2rem',
 });
+
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}/${month}/${day}`;
+};
+
+const formatTime = (date: Date): string => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
 
 const HistoryList: React.FC<HistoryListProps> = ({ history }) => {
   return (
-    <HistoryPaper>
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{
-          fontWeight: 600,
-          color: '#34495e',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          marginBottom: 2
-        }}
-      >
-        <AddCircleIcon sx={{ color: '#2ecc71' }} />
-        記帳歷史
-      </Typography>
-      <List sx={{ maxHeight: '300px', overflowY: 'auto' }}>
-        {history.length === 0 ? (
-          <Box sx={{
-            textAlign: 'center',
-            py: 4,
-            color: '#95a5a6',
-            fontSize: '0.9rem'
-          }}>
-            尚無記帳紀錄
-          </Box>
-        ) : (
-          history.map((amount, index) => (
-            <HistoryItem key={index}>
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="caption" sx={{ color: '#95a5a6' }}>
-                  #{history.length - index}
-                </Typography>
-              </Box>
-              <AmountText>
-                ${amount.toFixed(2)}
-              </AmountText>
-            </HistoryItem>
-          ))
-        )}
-      </List>
-    </HistoryPaper>
+    <HistoryBox>
+      {history.length === 0 ? (
+        <HistoryItem>
+          <DateTimeContainer>
+            <DateText>----/--/--</DateText>
+            <TimeText>--:--</TimeText>
+          </DateTimeContainer>
+          <AmountText>$0.00</AmountText>
+        </HistoryItem>
+      ) : (
+        [...history].reverse().map((record, index) => (
+          <HistoryItem key={index}>
+            <DateTimeContainer>
+              <DateText>{formatDate(record.date)}</DateText>
+              <TimeText>{formatTime(record.date)}</TimeText>
+            </DateTimeContainer>
+            <AmountText>
+              ${record.amount.toFixed(2)}
+            </AmountText>
+          </HistoryItem>
+        ))
+      )}
+    </HistoryBox>
   );
 };
 

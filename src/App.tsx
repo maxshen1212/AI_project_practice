@@ -4,14 +4,20 @@ import Display from './components/Display';
 import Keypad from './components/Keypad';
 import HistoryList from './components/HistoryList';
 
+interface HistoryRecord {
+  amount: number;
+  date: Date;
+}
+
 const theme = createTheme({
   palette: {
-    mode: 'light',
-    primary: {
-      main: '#2ecc71',
-    },
+    mode: 'dark',
     background: {
-      default: '#f8f9fa',
+      default: '#1e272e',
+      paper: '#2f3542',
+    },
+    primary: {
+      main: '#3498db',
     },
   },
   typography: {
@@ -31,7 +37,7 @@ const theme = createTheme({
 const App: React.FC = () => {
   const [currentAmount, setCurrentAmount] = useState<string>('0');
   const [total, setTotal] = useState<number>(0);
-  const [history, setHistory] = useState<number[]>([]);
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
 
   const handleInput = (value: string) => {
     if (currentAmount === '0' && value !== '.') {
@@ -66,8 +72,12 @@ const App: React.FC = () => {
   const handleOk = () => {
     const amount = parseFloat(currentAmount);
     if (!isNaN(amount)) {
+      const newRecord: HistoryRecord = {
+        amount,
+        date: new Date()
+      };
       setTotal(total + amount);
-      setHistory([...history, amount]);
+      setHistory([...history, newRecord]);
       setCurrentAmount('0');
     }
   };
@@ -90,12 +100,11 @@ const App: React.FC = () => {
           }}>
             <Display total={total} currentAmount={currentAmount} />
             <Box sx={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'background.paper',
               p: 3,
               borderRadius: '24px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              mb: 2,
             }}>
+              <HistoryList history={history} />
               <Keypad
                 onInput={handleInput}
                 onClear={handleClear}
@@ -103,7 +112,6 @@ const App: React.FC = () => {
                 onOk={handleOk}
               />
             </Box>
-            <HistoryList history={history} />
           </Box>
         </Container>
       </Box>
