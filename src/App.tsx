@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Container, ThemeProvider, createTheme, CssBaseline, Typography, IconButton } from '@mui/material';
 import Display from './components/Display';
 import Keypad from './components/Keypad';
 import HistoryList from './components/HistoryList';
 import CategorySelector, { Category } from './components/CategorySelector';
 import { PaletteColor, PaletteColorOptions } from '@mui/material/styles';
-import { theme as defaultTheme, DEFAULT_CATEGORIES } from './theme';
+import { theme as defaultTheme, DEFAULT_CATEGORIES, createAppTheme } from './theme';
 import { CategoryManager } from './components/CategoryManager';
 import Sidebar from './components/Sidebar';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -49,10 +49,53 @@ const App: React.FC = () => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<HistoryRecord | null>(null);
-  const [appTheme, setAppTheme] = useState(defaultTheme);
+
+  // 從 localStorage 讀取已保存的類別
+  const [categories, setCategories] = useState<Category[]>(() => {
+    try {
+      const savedCategories = localStorage.getItem('categories');
+      return savedCategories ? JSON.parse(savedCategories) : DEFAULT_CATEGORIES;
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      return DEFAULT_CATEGORIES;
+    }
+  });
+
+  // 根據類別生成主題
+  const [appTheme, setAppTheme] = useState(() => {
+    const customCategories = categories.reduce((acc, cat) => ({
+      ...acc,
+      [cat.id]: {
+        main: cat.color,
+        light: cat.color + '20',
+        dark: cat.color,
+        contrastText: '#fff'
+      }
+    }), {});
+    return createAppTheme(customCategories);
+  });
+
   const [selectedPage, setSelectedPage] = useState('accounting');
-  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // 當類別變更時，保存到 localStorage 並更新主題
+  useEffect(() => {
+    try {
+      localStorage.setItem('categories', JSON.stringify(categories));
+      const customCategories = categories.reduce((acc, cat) => ({
+        ...acc,
+        [cat.id]: {
+          main: cat.color,
+          light: cat.color + '20',
+          dark: cat.color,
+          contrastText: '#fff'
+        }
+      }), {});
+      setAppTheme(createAppTheme(customCategories));
+    } catch (error) {
+      console.error('Error saving categories:', error);
+    }
+  }, [categories]);
 
   const handleInput = (value: string) => {
     if (currentAmount === '0' && value !== '.') {
@@ -172,7 +215,7 @@ const App: React.FC = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h5" sx={{ fontWeight: 500 }}>類別管理</Typography>
               </Box>
-              <CategoryManager onThemeChange={handleThemeChange} />
+              <CategoryManager onThemeChange={handleThemeChange} initialCategories={categories} />
             </Box>
           </Box>
         );

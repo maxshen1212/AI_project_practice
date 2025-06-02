@@ -8,12 +8,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import * as Icons from '@mui/icons-material';
 
 interface HistoryListProps {
   history: Array<{
@@ -30,15 +25,6 @@ interface HistoryListProps {
   onEditRecord: (record: any) => void;
   onDeleteRecord: (id: string) => void;
 }
-
-const iconMap: { [key: string]: React.ComponentType } = {
-  RestaurantIcon: RestaurantIcon,
-  ShoppingCartIcon: ShoppingCartIcon,
-  DirectionsCarIcon: DirectionsCarIcon,
-  LocalHospitalIcon: LocalHospitalIcon,
-  SportsEsportsIcon: SportsEsportsIcon,
-  MoreHorizIcon: MoreHorizIcon,
-};
 
 const HistoryList: React.FC<HistoryListProps> = ({
   history,
@@ -66,6 +52,13 @@ const HistoryList: React.FC<HistoryListProps> = ({
       .padStart(2, '0')}:${recordDate.getMinutes().toString().padStart(2, '0')}`;
   };
 
+  const renderCategoryIcon = (iconName: string | undefined) => {
+    if (!iconName) return null;
+    // @ts-ignore
+    const IconComponent = Icons[iconName];
+    return IconComponent ? <IconComponent /> : null;
+  };
+
   return (
     <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
       {history.length === 0 ? (
@@ -80,99 +73,93 @@ const HistoryList: React.FC<HistoryListProps> = ({
           還沒有任何支出記錄
         </Typography>
       ) : (
-        history.map((record) => {
-          const CategoryIcon = record.category.icon
-            ? iconMap[record.category.icon as keyof typeof iconMap]
-            : null;
-
-          return (
-            <ListItem
-              key={record.id}
+        history.map((record) => (
+          <ListItem
+            key={record.id}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              py: 2,
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 2,
-                py: 2,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
+                gap: 1,
+                flex: 1,
               }}
             >
               <Box
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1,
-                  flex: 1,
+                  justifyContent: 'center',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  backgroundColor: `${record.category.color}15`,
+                  color: record.category.color,
                 }}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '8px',
-                    backgroundColor: `${record.category.color}15`,
-                    color: record.category.color,
-                  }}
-                >
-                  {CategoryIcon && <CategoryIcon />}
-                </Box>
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontWeight: 500,
-                      color: 'text.primary',
-                    }}
-                  >
-                    {record.category.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    {formatDateTime(record.date)}
-                  </Typography>
-                </Box>
+                {renderCategoryIcon(record.category.icon)}
               </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
+              <Box sx={{ minWidth: 0 }}>
                 <Typography
                   variant="body1"
                   sx={{
                     fontWeight: 500,
                     color: 'text.primary',
-                    minWidth: '80px',
-                    textAlign: 'right',
                   }}
                 >
-                  {record.amount.toLocaleString()} 元
+                  {record.category.name}
                 </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => onEditRecord(record)}
-                  sx={{ color: 'primary.main' }}
+                <Typography
+                  variant="body2"
+                  sx={{ color: 'text.secondary' }}
                 >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => onDeleteRecord(record.id)}
-                  sx={{ color: 'error.main' }}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                  {formatDateTime(record.date)}
+                </Typography>
               </Box>
-            </ListItem>
-          );
-        })
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                  color: 'text.primary',
+                  minWidth: '80px',
+                  textAlign: 'right',
+                }}
+              >
+                {record.amount.toLocaleString()} 元
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => onEditRecord(record)}
+                sx={{ color: 'primary.main' }}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={() => onDeleteRecord(record.id)}
+                sx={{ color: 'error.main' }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </ListItem>
+        ))
       )}
     </List>
   );

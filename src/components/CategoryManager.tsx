@@ -25,10 +25,11 @@ interface CategoryData {
 
 interface CategoryManagerProps {
   onThemeChange: (newTheme: ReturnType<typeof createAppTheme>, categories: CategoryData[]) => void;
+  initialCategories: CategoryData[];
 }
 
-export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange }) => {
-  const [categories, setCategories] = useState<CategoryData[]>(DEFAULT_CATEGORIES);
+export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange, initialCategories }) => {
+  const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
   const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
   const [newCategory, setNewCategory] = useState<Partial<CategoryData>>({
     color: '#000000'

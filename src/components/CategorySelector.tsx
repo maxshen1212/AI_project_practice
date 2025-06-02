@@ -1,26 +1,12 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import * as Icons from '@mui/icons-material';
 
 export type Category = {
   id: string;
   name: string;
   color: string;
   icon?: string;
-};
-
-const iconMap: { [key: string]: React.ComponentType } = {
-  RestaurantIcon: RestaurantIcon,
-  ShoppingCartIcon: ShoppingCartIcon,
-  DirectionsCarIcon: DirectionsCarIcon,
-  LocalHospitalIcon: LocalHospitalIcon,
-  SportsEsportsIcon: SportsEsportsIcon,
-  MoreHorizIcon: MoreHorizIcon,
 };
 
 interface CategorySelectorProps {
@@ -39,9 +25,10 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   categories
 }) => {
   const renderCategoryIcon = (iconName: string | undefined) => {
-    if (!iconName || !iconMap[iconName]) return null;
-    const IconComponent = iconMap[iconName];
-    return <IconComponent />;
+    if (!iconName) return null;
+    // @ts-ignore
+    const IconComponent = Icons[iconName];
+    return IconComponent ? <IconComponent /> : null;
   };
 
   // 排序類別列表，確保 'others' 在最後
