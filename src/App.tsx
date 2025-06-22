@@ -39,13 +39,30 @@ interface HistoryRecord {
   id: string;
   amount: number;
   date: Date;
-  category: Category;
+  categoryId: string;
 }
 
 const App: React.FC = () => {
   const [currentAmount, setCurrentAmount] = useState<string>('0');
+
+  const [history, setHistory] = useState<HistoryRecord[]>(() => {
+    try {
+      const savedHistory = localStorage.getItem('history');
+      if (savedHistory) {
+        const parsedHistory = JSON.parse(savedHistory);
+        return parsedHistory.map((record: any) => ({
+          ...record,
+          date: new Date(record.date),
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error loading history:', error);
+      return [];
+    }
+  });
+
   const [total, setTotal] = useState<number>(0);
-  const [history, setHistory] = useState<HistoryRecord[]>([]);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
   const [editingRecord, setEditingRecord] = useState<HistoryRecord | null>(null);
@@ -97,6 +114,20 @@ const App: React.FC = () => {
     }
   }, [categories]);
 
+  // Save history to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('history', JSON.stringify(history));
+    } catch (error) {
+      console.error('Error saving history:', error);
+    }
+  }, [history]);
+
+  // Recalculate total when history changes
+  useEffect(() => {
+    setTotal(history.reduce((acc, record) => acc + record.amount, 0));
+  }, [history]);
+
   const handleInput = (value: string) => {
     if (currentAmount === '0' && value !== '.') {
       setCurrentAmount(value);
@@ -146,13 +177,11 @@ const App: React.FC = () => {
       } else {
         const newHistory = history.map(record => {
           if (record.id === editingRecord.id) {
-            const newRecord = {
+            return {
               ...record,
               amount: pendingAmount || record.amount,
-              category: category
+              categoryId: category.id
             };
-            setTotal(prev => prev - record.amount + (pendingAmount || record.amount));
-            return newRecord;
           }
           return record;
         });
@@ -164,9 +193,8 @@ const App: React.FC = () => {
         id: Date.now().toString(),
         amount: pendingAmount,
         date: new Date(),
-        category: category
+        categoryId: category.id
       };
-      setTotal(total + pendingAmount);
       setHistory([...history, newRecord]);
     }
     setCurrentAmount('0');
@@ -189,10 +217,27 @@ const App: React.FC = () => {
   };
 
   const handleDeleteRecord = (recordId: string) => {
-    const recordToDelete = history.find(record => record.id === recordId);
-    if (recordToDelete) {
-      setTotal(prev => prev - recordToDelete.amount);
-      setHistory(history.filter(record => record.id !== recordId));
+    setHistory(history.filter(record => record.id !== recordId));
+  };
+
+  const handleDeleteCategory = (categoryId: string, deleteRecords: boolean) => {
+    const updatedCategories = categories.filter(cat => cat.id !== categoryId);
+    setCategories(updatedCategories);
+
+    if (deleteRecords) {
+      setHistory(history.filter(record => record.categoryId !== categoryId));
+    } else {
+      // 將記錄重新分配給"其他"類別
+      const othersCategory = categories.find(cat => cat.id === 'others');
+      if (othersCategory) {
+        const updatedHistory = history.map(record => {
+          if (record.categoryId === categoryId) {
+            return { ...record, categoryId: othersCategory.id };
+          }
+          return record;
+        });
+        setHistory(updatedHistory);
+      }
     }
   };
 
@@ -215,7 +260,11 @@ const App: React.FC = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h5" sx={{ fontWeight: 500 }}>類別管理</Typography>
               </Box>
-              <CategoryManager onThemeChange={handleThemeChange} initialCategories={categories} />
+              <CategoryManager
+                onThemeChange={handleThemeChange}
+                initialCategories={categories}
+                onDeleteCategory={handleDeleteCategory}
+              />
             </Box>
           </Box>
         );
@@ -260,6 +309,7 @@ const App: React.FC = () => {
                     history={history}
                     onEditRecord={handleEditRecord}
                     onDeleteRecord={handleDeleteRecord}
+                    categories={categories}
                   />
                   <Box sx={{ mt: 4 }}>
                     <Keypad

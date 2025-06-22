@@ -57,7 +57,7 @@ export const DEFAULT_CATEGORIES = [
   { id: 'transport', name: '交通', color: CATEGORY_COLORS.EARTH, icon: 'DirectionsCarIcon' },
   { id: 'medical', name: '醫療', color: CATEGORY_COLORS.KHAKI, icon: 'LocalHospitalIcon' },
   { id: 'entertainment', name: '娛樂', color: CATEGORY_COLORS.SAND, icon: 'SportsEsportsIcon' },
-  { id: 'others', name: '其他', color: CATEGORY_COLORS.GRAY_BROWN, icon: 'MoreHorizIcon' },
+  { id: 'others', name: '其他', color: CATEGORY_COLORS.GRAY_BROWN, icon: 'Category' },
 ];
 
 // 創建基本主題

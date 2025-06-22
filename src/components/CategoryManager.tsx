@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -8,6 +8,13 @@ import {
   ListItem,
   ListItemText,
   Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,24 +33,46 @@ interface CategoryData {
 interface CategoryManagerProps {
   onThemeChange: (newTheme: ReturnType<typeof createAppTheme>, categories: CategoryData[]) => void;
   initialCategories: CategoryData[];
+  onDeleteCategory: (categoryId: string, deleteRecords: boolean) => void;
 }
 
-export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange, initialCategories }) => {
+export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange, initialCategories, onDeleteCategory }) => {
   const [categories, setCategories] = useState<CategoryData[]>(initialCategories);
   const [editingCategory, setEditingCategory] = useState<CategoryData | null>(null);
   const [newCategory, setNewCategory] = useState<Partial<CategoryData>>({
     color: '#000000'
   });
   const [isAdding, setIsAdding] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [deleteRecords, setDeleteRecords] = useState(false);
 
-  const handleDelete = (id: string) => {
+  useEffect(() => {
+    if (!editingCategory) {
+      setCategories(initialCategories);
+    }
+  }, [initialCategories, editingCategory]);
+
+  const handleDeleteClick = (id: string) => {
     if (id === 'others') {
       alert('無法刪除預設類別');
       return;
     }
-    const updatedCategories = categories.filter(cat => cat.id !== id);
-    setCategories(updatedCategories);
-    updateTheme(updatedCategories);
+    setDeletingCategoryId(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingCategoryId) {
+      onDeleteCategory(deletingCategoryId, deleteRecords);
+    }
+    handleDeleteCancel();
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setDeletingCategoryId(null);
+    setDeleteRecords(false);
   };
 
   const updateTheme = (updatedCategories: CategoryData[]) => {
@@ -265,7 +294,7 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange,
               </IconButton>
               <IconButton
                 edge="end"
-                onClick={() => handleDelete(category.id)}
+                onClick={() => handleDeleteClick(category.id)}
                 disabled={category.id === 'others'}
               >
                 <DeleteIcon />
@@ -274,6 +303,37 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange,
           );
         })}
       </List>
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={handleDeleteCancel}
+      >
+        <DialogTitle>確認刪除</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            您確定要刪除這個類別嗎？
+          </DialogContentText>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={deleteRecords}
+                onChange={(e) => setDeleteRecords(e.target.checked)}
+              />
+            }
+            label="同時刪除此類別的所有記帳記錄"
+          />
+          {!deleteRecords && (
+            <DialogContentText sx={{ mt: 1, fontSize: '0.875rem', color: 'text.secondary' }}>
+              提示：若不勾選，此類別的所有記錄將會被歸類到「其他」。
+            </DialogContentText>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>取消</Button>
+          <Button onClick={handleDeleteConfirm} color="error">
+            確認刪除
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
