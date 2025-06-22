@@ -288,7 +288,6 @@ export const CategoryManager: React.FC<CategoryManagerProps> = ({ onThemeChange,
               <IconButton
                 edge="end"
                 onClick={() => setEditingCategory(category)}
-                disabled={category.id === 'others'}
               >
                 <EditIcon />
               </IconButton>
