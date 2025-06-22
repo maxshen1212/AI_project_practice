@@ -1,3 +1,15 @@
+/**
+ * @file App.tsx
+ * @description
+ * 這是應用程式的根組件，也是所有組件的樞紐。
+ * 它負責管理整個應用的核心狀態，包括：
+ * - 當前輸入的金額
+ * - 所有的記帳歷史記錄
+ * - 所有可用的支出類別
+ * - 應用程式的主題和頁面導覽
+ *
+ * 它也定義了所有處理使用者互動的函式，並將狀態和函式作為 props 傳遞給子組件。
+ */
 import React, { useState, useEffect } from 'react';
 import { Box, Container, ThemeProvider, createTheme, CssBaseline, Typography, IconButton } from '@mui/material';
 import Display from './components/Display';
@@ -11,7 +23,12 @@ import Sidebar from './components/Sidebar';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 
-// 擴展主題類型定義
+/**
+ * @description
+ * 透過 TypeScript 的模組擴展（Module Augmentation）功能，
+ * 為 Material-UI 的預設主題類型（Palette and PaletteOptions）新增自定義的 `categories` 屬性。
+ * 這使得我們可以在整個應用的主題中，安全地使用像 `theme.palette.categories.food` 這樣的自訂顏色。
+ */
 declare module '@mui/material/styles' {
   interface Palette {
     categories: {
@@ -35,6 +52,10 @@ declare module '@mui/material/styles' {
   }
 }
 
+/**
+ * @interface HistoryRecord
+ * @description 定義單一記帳記錄物件的資料結構。
+ */
 interface HistoryRecord {
   id: string;
   amount: number;
@@ -42,9 +63,21 @@ interface HistoryRecord {
   categoryId: string;
 }
 
+/**
+ * App 根組件
+ */
 const App: React.FC = () => {
+  // --- 狀態管理 (State Management) ---
+
+  /** @state {string} currentAmount - 使用者在數字鍵盤上當前輸入的金額字串 */
   const [currentAmount, setCurrentAmount] = useState<string>('0');
 
+  /**
+   * @state {HistoryRecord[]} history - 所有的記帳記錄。
+   * 初始化時，會嘗試從 `localStorage` 讀取已儲存的記錄。
+   * `try-catch` 區塊用於處理可能的 JSON 解析錯誤。
+   * `map` 用於將從 localStorage 讀取出的日期字串轉換回 Date 物件。
+   */
   const [history, setHistory] = useState<HistoryRecord[]>(() => {
     try {
       const savedHistory = localStorage.getItem('history');
@@ -62,12 +95,20 @@ const App: React.FC = () => {
     }
   });
 
+  /** @state {number} total - 總支出金額，此狀態會由 useEffect 根據 history 自動計算 */
   const [total, setTotal] = useState<number>(0);
+  /** @state {boolean} showCategorySelector - 控制是否顯示類別選擇畫面 */
   const [showCategorySelector, setShowCategorySelector] = useState(false);
+  /** @state {number | null} pendingAmount - 當使用者按下 OK 後，臨時儲存待處理的金額 */
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
+  /** @state {HistoryRecord | null} editingRecord - 如果使用者正在編輯一筆記錄，這裡會儲存該記錄的物件 */
   const [editingRecord, setEditingRecord] = useState<HistoryRecord | null>(null);
 
-  // 從 localStorage 讀取已保存的類別
+  /**
+   * @state {Category[]} categories - 所有可用的類別。
+   * 初始化時，會嘗試從 `localStorage` 讀取使用者自訂的類別。
+   * 如果讀取失敗或不存在，則使用 `DEFAULT_CATEGORIES` 作為預設值。
+   */
   const [categories, setCategories] = useState<Category[]>(() => {
     try {
       const savedCategories = localStorage.getItem('categories');
@@ -78,7 +119,10 @@ const App: React.FC = () => {
     }
   });
 
-  // 根據類別生成主題
+  /**
+   * @state {Theme} appTheme - 應用程式的 Material-UI 主題物件。
+   * 初始化時，會根據 `categories` 狀態動態生成主題。
+   */
   const [appTheme, setAppTheme] = useState(() => {
     const customCategories = categories.reduce((acc, cat) => ({
       ...acc,
@@ -92,10 +136,19 @@ const App: React.FC = () => {
     return createAppTheme(customCategories);
   });
 
+  /** @state {string} selectedPage - 當前顯示的頁面 ID (例如 'accounting', 'categories') */
   const [selectedPage, setSelectedPage] = useState('accounting');
+  /** @state {boolean} sidebarOpen - 控制側邊欄的展開與收合狀態 */
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // 當類別變更時，保存到 localStorage 並更新主題
+  // --- 副作用處理 (Side Effects) ---
+
+  /**
+   * @effect
+   * 當 `categories` 狀態改變時觸發。
+   * 1. 將最新的類別列表儲存到 `localStorage`。
+   * 2. 根據新的類別列表重新生成並更新應用程式的主題。
+   */
   useEffect(() => {
     try {
       localStorage.setItem('categories', JSON.stringify(categories));
@@ -114,7 +167,10 @@ const App: React.FC = () => {
     }
   }, [categories]);
 
-  // Save history to localStorage
+  /**
+   * @effect
+   * 當 `history` 狀態改變時觸發，將最新的歷史記錄儲存到 `localStorage`。
+   */
   useEffect(() => {
     try {
       localStorage.setItem('history', JSON.stringify(history));
@@ -123,11 +179,18 @@ const App: React.FC = () => {
     }
   }, [history]);
 
-  // Recalculate total when history changes
+  /**
+   * @effect
+   * 當 `history` 狀態改變時觸發，自動重新計算總支出金額。
+   * 這確保了 `total` 永遠與 `history` 的內容保持同步。
+   */
   useEffect(() => {
     setTotal(history.reduce((acc, record) => acc + record.amount, 0));
   }, [history]);
 
+  // --- 事件處理函式 (Event Handlers) ---
+
+  /** 處理數字鍵盤的輸入 */
   const handleInput = (value: string) => {
     if (currentAmount === '0' && value !== '.') {
       setCurrentAmount(value);
@@ -146,6 +209,7 @@ const App: React.FC = () => {
     }
   };
 
+  /** 處理 'AC' 清除按鈕 */
   const handleClear = () => {
     setCurrentAmount('0');
     setShowCategorySelector(false);
@@ -153,6 +217,7 @@ const App: React.FC = () => {
     setEditingRecord(null);
   };
 
+  /** 處理退格按鈕 */
   const handleBackspace = () => {
     if (currentAmount.length > 1) {
       setCurrentAmount(currentAmount.slice(0, -1));
@@ -161,6 +226,7 @@ const App: React.FC = () => {
     }
   };
 
+  /** 處理 'OK' 確認按鈕，觸發類別選擇 */
   const handleOk = () => {
     const amount = parseFloat(currentAmount);
     if (!isNaN(amount)) {
@@ -169,6 +235,7 @@ const App: React.FC = () => {
     }
   };
 
+  /** 處理在類別選擇畫面選擇一個類別後的操作 */
   const handleCategorySelect = (category: Category) => {
     if (editingRecord) {
       if (pendingAmount === 0) {
@@ -202,6 +269,7 @@ const App: React.FC = () => {
     setPendingAmount(null);
   };
 
+  /** 處理在類別選擇畫面點擊取消 */
   const handleCategoryCancel = () => {
     setShowCategorySelector(false);
     setPendingAmount(null);
@@ -209,6 +277,7 @@ const App: React.FC = () => {
     setCurrentAmount(editingRecord ? editingRecord.amount.toString() : '0');
   };
 
+  /** 處理在歷史列表中點擊編輯按鈕 */
   const handleEditRecord = (record: HistoryRecord) => {
     setEditingRecord(record);
     setCurrentAmount(record.amount.toString());
@@ -216,10 +285,12 @@ const App: React.FC = () => {
     setShowCategorySelector(true);
   };
 
+  /** 處理在歷史列表中點擊刪除按鈕 */
   const handleDeleteRecord = (recordId: string) => {
     setHistory(history.filter(record => record.id !== recordId));
   };
 
+  /** 處理從 CategoryManager 傳來的類別刪除請求 */
   const handleDeleteCategory = (categoryId: string, deleteRecords: boolean) => {
     const updatedCategories = categories.filter(cat => cat.id !== categoryId);
     setCategories(updatedCategories);
@@ -227,7 +298,6 @@ const App: React.FC = () => {
     if (deleteRecords) {
       setHistory(history.filter(record => record.categoryId !== categoryId));
     } else {
-      // 將記錄重新分配給"其他"類別
       const othersCategory = categories.find(cat => cat.id === 'others');
       if (othersCategory) {
         const updatedHistory = history.map(record => {
@@ -241,11 +311,16 @@ const App: React.FC = () => {
     }
   };
 
+  /** 處理從 CategoryManager 傳來的類別變更，以更新主題 */
   const handleThemeChange = (newTheme: ReturnType<typeof createTheme>, updatedCategories: Category[]) => {
     setAppTheme(newTheme);
     setCategories(updatedCategories);
   };
 
+  /**
+   * 根據 `selectedPage` 狀態，動態渲染主內容區域的函式。
+   * @returns {React.ReactElement}
+   */
   const renderContent = () => {
     switch (selectedPage) {
       case 'categories':
@@ -327,6 +402,7 @@ const App: React.FC = () => {
     }
   };
 
+  // --- 主渲染區 (Main Render) ---
   return (
     <ThemeProvider theme={appTheme}>
       <CssBaseline />
