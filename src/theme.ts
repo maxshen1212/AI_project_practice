@@ -52,11 +52,11 @@ const defaultCategories = {
 
 // 預設類別資料
 export const DEFAULT_CATEGORIES = [
-  { id: 'food', name: '飲食', color: CATEGORY_COLORS.BROWN, icon: 'RestaurantIcon' },
-  { id: 'daily', name: '日用品', color: CATEGORY_COLORS.ROSEWOOD, icon: 'ShoppingCartIcon' },
-  { id: 'transport', name: '交通', color: CATEGORY_COLORS.EARTH, icon: 'DirectionsCarIcon' },
-  { id: 'medical', name: '醫療', color: CATEGORY_COLORS.KHAKI, icon: 'LocalHospitalIcon' },
-  { id: 'entertainment', name: '娛樂', color: CATEGORY_COLORS.SAND, icon: 'SportsEsportsIcon' },
+  { id: 'food', name: '飲食', color: CATEGORY_COLORS.BROWN, icon: 'Fastfood' },
+  { id: 'daily', name: '日用品', color: CATEGORY_COLORS.ROSEWOOD, icon: 'Home' },
+  { id: 'transport', name: '交通', color: CATEGORY_COLORS.EARTH, icon: 'DirectionsBus' },
+  { id: 'medical', name: '醫療', color: CATEGORY_COLORS.KHAKI, icon: 'LocalHospital' },
+  { id: 'entertainment', name: '娛樂', color: CATEGORY_COLORS.SAND, icon: 'SportsEsports' },
   { id: 'others', name: '其他', color: CATEGORY_COLORS.GRAY_BROWN, icon: 'Category' },
 ];
 
